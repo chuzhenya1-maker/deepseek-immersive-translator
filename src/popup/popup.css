@@ -1,0 +1,69 @@
+:root {
+  color: #172033;
+  background: #f7f9fc;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.popup {
+  box-sizing: border-box;
+  width: 320px;
+  min-height: 240px;
+  padding: 24px;
+}
+
+.popup__status {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: #3154b8;
+  background: #e8edff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.popup__status.is-ready {
+  color: #17613b;
+  background: #e8f7ef;
+}
+
+.popup h1 {
+  margin: 18px 0 8px;
+  font-size: 22px;
+}
+
+.popup p {
+  margin: 0 0 24px;
+  color: #596579;
+  line-height: 1.6;
+}
+
+.popup .popup__notice {
+  margin-top: -12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  color: #8a4d00;
+  background: #fff6e5;
+  font-size: 13px;
+}
+
+.popup button {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: #fff;
+  background: #3154b8;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background: #26469f;
+}
