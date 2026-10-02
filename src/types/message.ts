@@ -10,6 +10,8 @@ import type {
 } from './translation';
 
 export const MESSAGE_TYPES = {
+  CACHE_LOOKUP: 'CACHE_LOOKUP',
+  CACHE_WRITE: 'CACHE_WRITE',
   TEST_API: 'TEST_API',
   GET_SETTINGS: 'GET_SETTINGS',
   UPDATE_SETTINGS: 'UPDATE_SETTINGS',
@@ -130,6 +132,8 @@ export type SelectionContentMessage =
   | ShowSelectionTranslationMessage;
 
 export type ExtensionRequest =
+  | { type: typeof MESSAGE_TYPES.CACHE_LOOKUP; payload: { items: import('../services/translationCache').CacheLookupItem[]; context: import('../services/translationCache').TranslationCacheContext } }
+  | { type: typeof MESSAGE_TYPES.CACHE_WRITE; payload: { items: import('../services/translationCache').CacheWriteItem[]; context: import('../services/translationCache').TranslationCacheContext } }
   | TestApiRequest
   | GetSettingsRequest
   | UpdateSettingsRequest

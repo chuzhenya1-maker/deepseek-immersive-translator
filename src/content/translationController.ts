@@ -6,9 +6,8 @@ import {
   type TranslationQueueOptions,
 } from './translationQueue.ts';
 import { sendExtensionMessage } from '../services/message.ts';
+import { getCachedTranslations, setCachedTranslations } from './cacheClient.ts';
 import {
-  getCachedTranslations,
-  setCachedTranslations,
   type CacheLookupItem,
   type CacheWriteItem,
   type TranslationCacheContext,

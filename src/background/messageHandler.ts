@@ -11,6 +11,7 @@ import {
   releaseTranslationRequest,
 } from './requestRegistry';
 import { getSettings, updateSettings } from '../services/storage';
+import { getCachedTranslations, setCachedTranslations } from '../services/translationCache';
 import {
   MESSAGE_TYPES,
   type ExtensionRequest,
@@ -76,6 +77,19 @@ function isTranslateBatchPayload(value: unknown): value is TranslateBatchPayload
 export function isExtensionRequest(value: unknown): value is ExtensionRequest {
   if (!isRecord(value) || typeof value.type !== 'string') {
     return false;
+  }
+
+  if (value.type === MESSAGE_TYPES.CACHE_LOOKUP || value.type === MESSAGE_TYPES.CACHE_WRITE) {
+    const payload = value.payload;
+    if (!isRecord(payload) || !Array.isArray(payload.items) || !isRecord(payload.context)) return false;
+    const context = payload.context;
+    return payload.items.length <= 10_000 &&
+      typeof context.targetLanguage === 'string' && isTranslationStyle(context.translationStyle) &&
+      typeof context.academicMode === 'boolean' && typeof context.preserveEnglishTerms === 'boolean' &&
+      (context.customPrompt === undefined || typeof context.customPrompt === 'string') &&
+      payload.items.every((item: unknown) => isRecord(item) &&
+        typeof item.id === 'string' && typeof item.text === 'string' &&
+        (value.type === MESSAGE_TYPES.CACHE_LOOKUP || typeof item.translation === 'string'));
   }
 
   if (
@@ -263,18 +277,25 @@ async function translateBatch(
 
 export async function handleExtensionMessage(
   request: ExtensionRequest,
+  trustedOptions = false,
 ): Promise<MessageResponse<unknown>> {
   try {
     switch (request.type) {
+      case MESSAGE_TYPES.CACHE_LOOKUP:
+        return { ok: true, data: [...await getCachedTranslations(request.payload.items, request.payload.context)] };
+      case MESSAGE_TYPES.CACHE_WRITE:
+        return { ok: true, data: await setCachedTranslations(request.payload.items, request.payload.context) };
       case MESSAGE_TYPES.GET_SETTINGS:
-        return { ok: true, data: await getSettings() };
+        return trustedOptions
+          ? { ok: true, data: await getSettings() }
+          : { ok: false, error: '此操作仅允许在扩展设置页执行' };
 
       case MESSAGE_TYPES.UPDATE_SETTINGS: {
         const settings = await updateSettings(request.payload);
         void broadcastRuntimeConfig(getTranslationRuntimeConfig(settings)).catch(
           () => undefined,
         );
-        return { ok: true, data: settings };
+        return { ok: true, data: trustedOptions ? settings : getTranslationRuntimeConfig(settings) };
       }
 
       case MESSAGE_TYPES.GET_TRANSLATION_CONFIG:

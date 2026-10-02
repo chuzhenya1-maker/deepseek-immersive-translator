@@ -52,11 +52,11 @@ function validateSettings(settings: AppSettings): string | null {
   try {
     const url = new URL(api.baseUrl);
     if (
-      (url.protocol !== 'https:' && url.protocol !== 'http:') ||
+      url.origin !== 'https://api.deepseek.com' ||
       url.username ||
       url.password
     ) {
-      return 'API Base URL 必须是有效的 HTTP 或 HTTPS 地址';
+      return 'API Base URL 必须使用 https://api.deepseek.com 官方地址';
     }
   } catch {
     return 'API Base URL 格式不正确';

@@ -32,6 +32,8 @@ test('translateBatch requests JSON mode and returns raw assistant content', asyn
   await withMockFetch(
     (async (_input, init) => {
       const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      assert.equal(init?.redirect, 'error');
+      assert.equal(init?.credentials, 'omit');
       assert.deepEqual(body.response_format, { type: 'json_object' });
       assert.deepEqual(body.thinking, { type: 'disabled' });
       assert.equal(String(init?.headers).includes('test-key'), false);
@@ -57,6 +59,18 @@ test('translateBatch requests JSON mode and returns raw assistant content', asyn
       assert.match(result, /translations/);
     },
   );
+});
+
+test('rejects insecure, third-party and credential-bearing endpoints before fetch', async () => {
+  await withMockFetch((async () => { assert.fail('fetch must not run'); }) as typeof fetch, async () => {
+    const credentialsUrl = new URL('https://api.deepseek.com');
+    credentialsUrl.username = 'dummy-user';
+    credentialsUrl.password = 'dummy-password';
+    for (const baseUrl of ['http://api.deepseek.com', 'https://attacker.example', 'https://api.deepseek.com.attacker.example', credentialsUrl.href]) {
+      const client = new DeepSeekClient({ apiKey: 'dummy', baseUrl, model: 'test', temperature: 0.2, timeout: 1000 });
+      await assert.rejects(client.testConnection(), (error: unknown) => error instanceof DeepSeekClientError && error.code === 'INVALID_CONFIGURATION');
+    }
+  });
 });
 
 test('connection test disables thinking and leaves enough room for final OK content', async () => {

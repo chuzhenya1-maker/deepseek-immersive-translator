@@ -84,7 +84,7 @@ function createEndpoint(baseUrl: string): string {
     );
   }
 
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+  if (url.origin !== 'https://api.deepseek.com' || url.username || url.password) {
     throw new DeepSeekClientError(
       'INVALID_CONFIGURATION',
       'DeepSeek API 配置无效',
@@ -229,6 +229,8 @@ export class DeepSeekClient {
     try {
       const response = await fetch(createEndpoint(this.options.baseUrl), {
         method: 'POST',
+        redirect: 'error',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.options.apiKey}`,

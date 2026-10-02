@@ -4,6 +4,10 @@ DeepSeek Immersive Translator 是一个基于 DeepSeek API 的 Chrome / Edge Man
 
 当前版本：`0.1.0`（MVP）
 
+本项目采用 [MIT License](LICENSE)，允许使用、修改及商业分发，请保留版权和许可声明。这是非官方社区项目，与 DeepSeek、Chrome 或 Microsoft Edge 无隶属或背书关系。
+
+[安装与更新说明](docs/INSTALL.md) · [隐私说明](PRIVACY.md) · [安全报告](SECURITY.md) · [第三方许可](THIRD_PARTY_NOTICES.md)
+
 ## 核心功能
 
 - 网页双语、仅译文、仅原文显示，以及不刷新页面的恢复原文
@@ -29,10 +33,10 @@ DeepSeek Immersive Translator 是一个基于 DeepSeek API 的 Chrome / Edge Man
 
 ## Windows 安装与构建
 
-需要 Node.js 20 或更高版本及 npm。
+需要 Node.js 22.18 或更高版本及 npm。
 
 ```powershell
-npm install
+npm ci
 npm run build
 ```
 
@@ -77,7 +81,7 @@ npm run test
 
 翻译请求会明确关闭 DeepSeek Flash 的思考模式，避免推理 token 挤占结构化译文输出，并让 Temperature 设置按非思考模式生效。
 
-Manifest 当前仅授权 DeepSeek 官方 API 域名。虽然设置页保留自定义 Base URL 字段，但其他代理或本地 API 还需要相应的 Manifest host permission；MVP 不会申请覆盖所有网站的网络请求权限。
+Manifest 和客户端均只允许 `https://api.deepseek.com` 官方 API，拒绝 HTTP、其他域名、URL 内凭据及重定向。Base URL 可配置官方域名下的路径，不支持代理或本地 API。
 
 ## 使用方法
 
@@ -124,6 +128,8 @@ Manifest 当前仅授权 DeepSeek 官方 API 域名。虽然设置页保留自�
 - 翻译缓存保存在浏览器本地；项目当前没有开发者后端、数据库、账号或云同步。
 - DeepSeek 返回内容通过 `textContent` 或 React 普通文本渲染，不作为 HTML 执行。
 - Chrome Storage 是本地扩展存储，不等同于硬件密钥库；请保护浏览器账户和设备，不要声称其“绝对安全”。
+- 本地存储仅限扩展可信上下文；网页内容脚本的缓存请求经后台处理，更新网页显示设置的响应不包含 API Key。完整设置和 API 测试仅允许扩展设置页调用。
+- 缓存可能包含敏感原文和译文；关闭缓存不会删除旧条目，需要另行清空。详细数据流、费用、删除方式见 [隐私说明](PRIVACY.md)。
 
 ## 项目结构
 
@@ -170,7 +176,7 @@ docs/FINAL_REPORT.md       Phase 9 最终开发与验收报告
 - 跨域 iframe 支持有限；MVP 只在顶层页面初始化。
 - 高度复杂或频繁重绘的 Web App 可能存在正文识别、节点替换或布局兼容差异。
 - SPA 仅做基础的 `pushState`、`replaceState`、`popstate` 和 `hashchange` 适配。
-- 自定义 API Base URL 受 Manifest 的官方 DeepSeek 域名权限限制。
+- 自定义 API Base URL 仅支持官方 DeepSeek HTTPS 域名下的路径。
 - 当前图标是项目内生成的 MVP 占位设计，正式商店发布前建议进行品牌设计。
 
 ## 路线图（不属于当前 MVP）
